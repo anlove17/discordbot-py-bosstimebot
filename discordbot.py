@@ -61,7 +61,7 @@ async def on_message(message):
         sorted_reply = sorted(reply, key=lambda x: x["다음 젠 시간"])
        
         for boss in sorted_reply:
-            output.append(f"{boss['다음 젠 시간']}, {boss['이름']}, {boss['젠위치']}, {boss['레벨']}")
+            output.append(f"{BOSS_INFO[name]['다음 젠 시간']}, {BOSS_INFO[name]}, {BOSS_INFO[name]['젠위치']}, {BOSS_INFO[name]['레벨']}")
         
         await message.reply('\n'.join(output))
 
@@ -77,7 +77,7 @@ async def on_message(message):
         sorted_reply = sorted(reply, key=lambda x: x["다음 젠 시간"])
        
         for boss in sorted_reply:
-            output.append(f"{boss['다음 젠 시간']}, {boss['이름']}, {boss['젠위치']}, {boss['레벨']}")
+            output.append(f"{BOSS_INFO[name]['다음 젠 시간']}, {BOSS_INFO[name]}, {BOSS_INFO[name]['젠위치']}, {BOSS_INFO[name]['레벨']}")
         
         await message.reply('\n'.join(output))
                 
