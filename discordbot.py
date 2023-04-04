@@ -34,6 +34,9 @@ BOSS_INFO = {
     '아르노슈트' : { '젠주기': 180,'젠위치': '고대유적지', '레벨':44, '다음 젠 시간' : '??:??'  }
 }
 
+reply = []
+output = []
+
 @client.event
 async def on_ready():
     print('봇이 온라인으로 전환되었습니다.')
@@ -48,17 +51,36 @@ async def on_message(message):
         target = message.content.split()[1] #입력된 메시지에서 2번째 단어 추출
         now = datetime.utcnow() + timedelta(hours=9) #KST (UTC+9)
 
-        reply = []
         for name, info in BOSS_INFO.items():
             if name == target:
                 next_spawn = now + timedelta(minutes=info["젠주기"])
                 BOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
-                reply.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
-            else:
-                reply.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
-        await message.reply('\n'.join(reply))
+    
+            reply.append(info)
 
+        sorted_reply = sorted(reply, key=lambda x: x["다음 젠 시간"])
+       
+        for boss in sorted_reply:
+            output.append(f"{boss['다음 젠 시간']}, {boss['이름']}, {boss['젠위치']}, {boss['레벨']}")
+        
+        await message.reply('\n'.join(output))
 
+    if message.content.startswith('!젠타임'):
+        target1 = message.content.split()[1] #입력된 메시지에서 2번째 단어 추출
+        
+        for name, info in BOSS_INFO.items():
+            if name == target:
+                BOSS_INFO[name]["다음 젠 시간"] = message.content.split()[2]
+    
+            reply.append(info)
+
+        sorted_reply = sorted(reply, key=lambda x: x["다음 젠 시간"])
+       
+        for boss in sorted_reply:
+            output.append(f"{boss['다음 젠 시간']}, {boss['이름']}, {boss['젠위치']}, {boss['레벨']}")
+        
+        await message.reply('\n'.join(output))
+                
 try:
     client.run(TOKEN)
 except discord.errors.LoginFailure as e:
