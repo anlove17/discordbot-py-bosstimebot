@@ -59,7 +59,7 @@ async def on_message(message):
         await message.reply('\n'.join(reply))
 
           
-     elif message.content.startswith('!젠타임'):
+    elif message.content.startswith('!젠타임'):
         # 보스 이름과 시간 정보 추출
         args = message.content.split()
         if len(args) != 3:
