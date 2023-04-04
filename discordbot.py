@@ -58,8 +58,9 @@ async def on_message(message):
             if name == target:
                 next_spawn = now + timedelta(minutes=info["젠주기"])
                 BOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
-                
-        await message.reply('\n'.join(reply))
+        sorted_reply = sorted(reply, key=lambda x: x["다음 젠 시간"])
+        
+        await message.sorted_reply('\n'.join(sorted_reply))
 
 try:
     client.run(TOKEN)
