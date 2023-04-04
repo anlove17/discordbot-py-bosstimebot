@@ -36,7 +36,7 @@ BOSS_INFO = {
 }
 
 reply = []
-reply.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
+reply.append(f"{info['다음 젠 시간']}, {name}, , {info['젠위치']}, {info['레벨']}")
 
 @client.event
 async def on_ready():
