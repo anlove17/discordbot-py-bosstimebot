@@ -36,6 +36,7 @@ BOSS_INFO = {
 }
 
 reply = []
+reply.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
 
 @client.event
 async def on_ready():
@@ -56,9 +57,7 @@ async def on_message(message):
             if name == target:
                 next_spawn = now + timedelta(minutes=info["젠주기"])
                 BOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
-                reply.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
-            else:
-                reply.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
+                
         await message.reply('\n'.join(reply))
 
 try:
