@@ -47,12 +47,14 @@ async def on_ready():
     print('봇이 온라인으로 전환되었습니다.')
     await client.change_presence(status=discord.Status.online, activity=discord.Game("보스 타임 체크"))
 
-reply = []    
+ 
     
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
+    
+    reply = []   
     
     if message.content.startswith('!컷'):
         target = message.content.split()[1] #입력된 메시지에서 2번째 단어 추출
