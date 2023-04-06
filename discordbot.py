@@ -127,7 +127,7 @@ async def on_message(message):
             if boss_time_str == '??:??':
                 reply.append(f"??:??, {name}, {info['젠위치']}, {info['레벨']}")
                 continue
-        boss_time = datetime.datetime.strptime(boss_time_str, '%H:%M').time()
+        boss_time = datetime.strptime(boss_time_str, '%H:%M').time()
         now = datetime.datetime.now().time()
         if boss_time < now:
             BOSS_INFO[name]['다음 젠 시간'] = '??:??'
