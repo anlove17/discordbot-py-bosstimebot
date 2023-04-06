@@ -127,7 +127,7 @@ async def on_message(message):
             now = datetime.datetime.now().time() 
         
             if boss_time < now:
-            BOSS_INFO[boss]['time'] = '??:??'
+            BOSS_INFO[name]['다음 젠 시간'] = '??:??'
         
             reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         await message.reply('\n'.join(reply))
