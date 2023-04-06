@@ -130,7 +130,7 @@ async def on_message(message):
         elif boss_time_str.strip() == '':
             continue
         else:
-            boss_time = datetime.datetime.strptime(boss_time_str, '%H:%M').time()
+            boss_time = datetime.strptime(boss_time_str, '%H:%M').time()
             now = datetime.now().time()
             if boss_time < now:
                 BOSS_INFO[name]['다음 젠 시간'] = '??:??'
