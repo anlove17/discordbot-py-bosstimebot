@@ -118,7 +118,8 @@ async def on_message(message):
     elif message.content == '!전체초기화':
         for name in BOSS_INFO.keys():
             BOSS_INFO[name]['다음 젠 시간'] = '??:??'
-        await message.channel.send('보스타임이 모두 초기화 되었습니다.')
+            reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
+        await message.reply('\n'.join(reply))
 
 
 try:
