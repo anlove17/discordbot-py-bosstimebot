@@ -123,14 +123,17 @@ async def on_message(message):
     
     elif message.content == '!갱신':
         for name, info in sorted(BOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
-            boss_time = datetime.strptime(info['다음 젠 시간'], '%H:%M')
-            now = datetime.datetime.now().time()
-
+        boss_time_str = info['다음 젠 시간']
+        if boss_time_str == '??:??':
+            reply.append(f"??:??, {name}, {info['젠위치']}, {info['레벨']}")
+            continue
+        boss_time = datetime.datetime.strptime(boss_time_str, '%H:%M').time()
+        now = datetime.datetime.now().time()
         if boss_time < now:
             BOSS_INFO[name]['다음 젠 시간'] = '??:??'
-
-        reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
-
+            reply.append(f"??:??, {name}, {info['젠위치']}, {info['레벨']}")
+        else:
+            reply.append(f"{boss_time_str}, {name}, {info['젠위치']}, {info['레벨']}")
     await message.reply('\n'.join(reply))
         
 try:
