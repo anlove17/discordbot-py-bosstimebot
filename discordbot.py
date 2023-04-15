@@ -172,7 +172,7 @@ async def on_message(message):
         
     elif message.content == '!영지전체초기화':
         for name, info in sorted(ABOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
-            BOSS_INFO[name]['다음 젠 시간'] = '??:??'
+            ABOSS_INFO[name]['다음 젠 시간'] = '??:??'
             reply2.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         await message.reply('\n'.join(reply2))
         
