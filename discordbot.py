@@ -54,6 +54,15 @@ BOSS_INFO = {
     '레쉬' : { '젠주기': 180,'젠위치': '벌목지대', '레벨':53, '다음 젠 시간' : '??:??'  }
 }
 
+ABOSS_INFO = {
+    '선지자' : { '젠주기': 360,'젠위치': '아민타 검은 숲', '레벨':50, '다음 젠 시간' : '??:??'  },
+    '야수' : { '젠주기': 360,'젠위치': '라인소프 용암터', '레벨':50, '다음 젠 시간' : '??:??'  },
+    '체스킹퀸' : { '젠주기': 360,'젠위치': '론도 붉은 나락', '레벨':50, '다음 젠 시간' : '??:??'  },
+    '이즈굴드' : { '젠주기': 360,'젠위치': '아민타 푸른불꽃', '레벨':50, '다음 젠 시간' : '??:??'  },
+}
+
+
+
 @client.event
 async def on_ready():
     print('봇이 온라인으로 전환되었습니다.')
@@ -67,6 +76,7 @@ async def on_message(message):
         return
     
     reply = []   
+    reply2 = []
     
     if message.content.startswith('!컷'):
         target = message.content.split()[1] #입력된 메시지에서 2번째 단어 추출
@@ -91,23 +101,6 @@ async def on_message(message):
             return
         boss_name = args[1]
         time_str = args[2]
-
-        # BOSS_INFO 갱신
-        if boss_name not in BOSS_INFO:
-            await message.reply('존재하지 않는 보스 이름입니다.')
-            return
-        try:
-            time_obj = datetime.strptime(time_str, '%H:%M')
-        except ValueError:
-            await message.reply('잘못된 시간 형식입니다. 사용법: HH:MM')
-            return
-        BOSS_INFO[boss_name]['다음 젠 시간'] = time_str
-
-        # 갱신된 BOSS_INFO 출력
-        
-        for name, info in sorted(BOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
-            reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
-        await message.reply('\n'.join(reply))
         
     elif message.content.startswith('!초기화'):
         
@@ -132,6 +125,56 @@ async def on_message(message):
             BOSS_INFO[name]['다음 젠 시간'] = '??:??'
             reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         await message.reply('\n'.join(reply))
+        
+#여기부턴 영지 보스
+    
+    if message.content.startswith('!영지컷'):
+        target = message.content.split()[1] #입력된 메시지에서 2번째 단어 추출
+        now = datetime.utcnow() + timedelta(hours=9) #KST (UTC+9)
+
+        
+        for name, info in sorted(ABOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
+            if name == target:
+                next_spawn = now + timedelta(minutes=info["젠주기"])
+                ABOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
+                reply2.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
+            else:
+                reply2.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
+        await message.reply('\n'.join(reply2))
+
+          
+    elif message.content.startswith('!영지젠타임'):
+        
+        args = message.content.split() # 보스 이름과 시간 정보 추출
+        if len(args) != 3:
+            await message.reply('잘못된 명령어입니다. 사용법: !젠타임 보스이름 시간(HH:MM)')
+            return
+        boss_name = args[1]
+        time_str = args[2]
+        
+    elif message.content.startswith('!영지초기화'):
+        
+        args = message.content.split() # 보스 이름과 시간 정보 추출
+        if len(args) != 2:
+            await message.reply('잘못된 명령어입니다. 사용법: !초기화 보스이름')
+            return
+        boss_name = args[1]
+        
+        if boss_name not in ABOSS_INFO:
+            await message.reply('존재하지 않는 보스 이름입니다.')
+            return
+        ABOSS_INFO[boss_name]['다음 젠 시간'] = '??:??'
+        
+        # 갱신된 BOSS_INFO 출력
+        for name, info in sorted(ABOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
+            reply2.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
+        await message.reply('\n'.join(reply2))
+        
+    elif message.content == '!영지전체초기화':
+        for name, info in sorted(ABOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
+            BOSS_INFO[name]['다음 젠 시간'] = '??:??'
+            reply2.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
+        await message.reply('\n'.join(reply2))
         
 try:
     client.run(TOKEN)
