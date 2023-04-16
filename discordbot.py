@@ -102,6 +102,23 @@ async def on_message(message):
         boss_name = args[1]
         time_str = args[2]
         
+        # BOSS_INFO 갱신
+        if boss_name not in BOSS_INFO:
+            await message.reply('존재하지 않는 보스 이름입니다.')
+            return
+        try:
+            time_obj = datetime.strptime(time_str, '%H:%M')
+        except ValueError:
+            await message.reply('잘못된 시간 형식입니다. 사용법: HH:MM')
+            return
+        BOSS_INFO[boss_name]['다음 젠 시간'] = time_str
+
+        # 갱신된 BOSS_INFO 출력
+        reply = []
+        for name, info in sorted(BOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
+            reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
+        await message.reply('\n'.join(reply))
+        
     elif message.content.startswith('!초기화'):
         
         args = message.content.split() # 보스 이름과 시간 정보 추출
@@ -151,6 +168,22 @@ async def on_message(message):
             return
         boss_name = args[1]
         time_str = args[2]
+        
+        # BOSS_INFO 갱신
+        if boss_name not in ABOSS_INFO:
+            await message.reply('존재하지 않는 보스 이름입니다.')
+            return
+        try:
+            time_obj = datetime.strptime(time_str, '%H:%M')
+        except ValueError:
+            await message.reply('잘못된 시간 형식입니다. 사용법: HH:MM')
+            return
+        ABOSS_INFO[boss_name]['다음 젠 시간'] = time_str
+
+        # 갱신된 BOSS_INFO 출력
+        for name, info in sorted(ABOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
+            reply2.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
+        await message.reply('\n'.join(reply2))
         
     elif message.content.startswith('!영지초기화'):
         
