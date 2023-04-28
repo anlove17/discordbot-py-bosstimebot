@@ -11,8 +11,7 @@ TOKEN = os.environ['TOKEN']
 
 client = discord.Client()
 
-LOWBOSS_INFO =
-{
+BOSS_INFO = {
     '울리케' : { '젠주기': 180,'젠위치': '어스름깃털 언덕' , '레벨':32 , '다음 젠 시간' : '??:??' },
     '룬드레드' : { '젠주기': 180,'젠위치': '황금 거리', '레벨':32, '다음 젠 시간' : '??:??'  },
     '나딘' : { '젠주기': 180,'젠위치': '소금바람 항구', '레벨':32, '다음 젠 시간' : '??:??'  },
@@ -32,11 +31,7 @@ LOWBOSS_INFO =
     '분쇄자' : { '젠주기': 180,'젠위치': '붉은 모래언덕', '레벨':44, '다음 젠 시간' : '??:??'  },
     '다비드' : { '젠주기': 180,'젠위치': '불타는 벌판', '레벨':44 , '다음 젠 시간' : '??:??' },
     '암몬' : { '젠주기': 180,'젠위치': '고통의 계곡', '레벨':44, '다음 젠 시간' : '??:??'  },
-    '아르노슈트' : { '젠주기': 180,'젠위치': '고대유적지', '레벨':44, '다음 젠 시간' : '??:??'  }
-}
-
-BOSS_INFO = 
-{
+    '아르노슈트' : { '젠주기': 180,'젠위치': '고대유적지', '레벨':44, '다음 젠 시간' : '??:??'  },
     '이드라칸' : { '젠주기': 180,'젠위치': '아슬라니스 부족 옛터', '레벨':47, '다음 젠 시간' : '??:??'  },
     '보드레' : { '젠주기': 180,'젠위치': '보가트 뒷골목', '레벨':47, '다음 젠 시간' : '??:??'  } ,
     '카를로스' : { '젠주기': 180,'젠위치': '운하거리 시가지', '레벨':47, '다음 젠 시간' : '??:??'  } ,
@@ -69,10 +64,6 @@ ABOSS_INFO = {
     '야수' : { '젠주기': 360,'젠위치': '용암호수', '레벨':50, '다음 젠 시간' : '??:??'  },
     '체스킹퀸' : { '젠주기': 360,'젠위치': '왕과 여왕의 성', '레벨':50, '다음 젠 시간' : '??:??'  },
     '이즈굴드' : { '젠주기': 360,'젠위치': '용의 둥지', '레벨':50, '다음 젠 시간' : '??:??'  },
-    '토룡' : { '젠주기': 360,'젠위치': '토룡의 둥지', '레벨':50, '다음 젠 시간' : '??:??'  },
-    '어미' : { '젠주기': 360,'젠위치': '어미 서식지', '레벨':50, '다음 젠 시간' : '??:??'  },
-    '궤' : { '젠주기': 360,'젠위치': '버려진 광장', '레벨':50, '다음 젠 시간' : '??:??'  },
-    '어머니' : { '젠주기': 360,'젠위치': '지룡의 쉼터', '레벨':50, '다음 젠 시간' : '??:??'  }
 }
 
 
@@ -90,35 +81,23 @@ async def on_message(message):
         return
     
     reply = []   
-    reply1 = []
     reply2 = []
     
     if message.content.startswith('!컷'):
         target = message.content.split()[1] #입력된 메시지에서 2번째 단어 추출
         now = datetime.utcnow() + timedelta(hours=9) #KST (UTC+9)
-        args = message.content.split() # 보스 이름과 시간 정보 추출
-        boss_name = args[1]
+
         
-        if boss_name in BOSS_INFO:
-            for name, info in sorted(BOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
-                if name == target:
-                    next_spawn = now + timedelta(minutes=info["젠주기"])
-                    BOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
-                    reply.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
-                else:
-                    reply.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
-            await message.reply('\n'.join(reply))
-        
-        elif boss_name in RowBoss_INFO:
-            for name, info in sorted(RowBOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
-                if name == target:
-                    next_spawn = now + timedelta(minutes=info["젠주기"])
-                    BOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
-                    reply1.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
-                else:
-                    reply1.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
-            await message.reply('\n'.join(reply1))
-        
+        for name, info in sorted(BOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
+            if name == target:
+                next_spawn = now + timedelta(minutes=info["젠주기"])
+                BOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
+                reply.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
+            else:
+                reply.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
+        await message.reply('\n'.join(reply))
+
+          
     elif message.content.startswith('!젠타임'):
         
         args = message.content.split() # 보스 이름과 시간 정보 추출
@@ -234,73 +213,6 @@ async def on_message(message):
             ABOSS_INFO[name]['다음 젠 시간'] = '??:??'
             reply2.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         await message.reply('\n'.join(reply2))
-
- #여기부턴 저렙보스
-    
-    if message.content.startswith('!저렙보스컷'):
-        target = message.content.split()[1] #입력된 메시지에서 2번째 단어 추출
-        now = datetime.utcnow() + timedelta(hours=9) #KST (UTC+9)
-
-        
-        for name, info in sorted(LOWBOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
-            if name == target:
-                next_spawn = now + timedelta(minutes=info["젠주기"])
-                LOWBOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
-                reply2.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
-            else:
-                reply2.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
-        await message.reply('\n'.join(reply2))
-
-          
-    elif message.content.startswith('!저렙젠타임'):
-        
-        args = message.content.split() # 보스 이름과 시간 정보 추출
-        if len(args) != 3:
-            await message.reply('잘못된 명령어입니다. 사용법: !저렙젠타임 보스이름 시간(HH:MM)')
-            return
-        boss_name = args[1]
-        time_str = args[2]
-        
-        # BOSS_INFO 갱신
-        if boss_name not in LOWBOSS_INFO:
-            await message.reply('존재하지 않는 보스 이름입니다.')
-            return
-        try:
-            time_obj = datetime.strptime(time_str, '%H:%M')
-        except ValueError:
-            await message.reply('잘못된 시간 형식입니다. 사용법: HH:MM')
-            return
-        LOWBOSS_INFO[boss_name]['다음 젠 시간'] = time_str
-
-        # 갱신된 BOSS_INFO 출력
-        for name, info in sorted(LOWBOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
-            reply2.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
-        await message.reply('\n'.join(reply2))
-        
-    elif message.content.startswith('!저렙초기화'):
-        
-        args = message.content.split() # 보스 이름과 시간 정보 추출
-        if len(args) != 2:
-            await message.reply('잘못된 명령어입니다. 사용법: !초기화 보스이름')
-            return
-        boss_name = args[1]
-        
-        if boss_name not in LOWBOSS_INFO:
-            await message.reply('존재하지 않는 보스 이름입니다.')
-            return
-        LOWBOSS_INFO[boss_name]['다음 젠 시간'] = '??:??'
-        
-        # 갱신된 BOSS_INFO 출력
-        for name, info in sorted(LOWBOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
-            reply2.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
-        await message.reply('\n'.join(reply2))
-        
-    elif message.content == '!저렙전체초기화':
-        for name, info in sorted(LOWBOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
-            LOWBOSS_INFO[name]['다음 젠 시간'] = '??:??'
-            reply2.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
-        await message.reply('\n'.join(reply2))
-        
         
 try:
     client.run(TOKEN)
