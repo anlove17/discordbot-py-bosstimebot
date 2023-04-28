@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 load_dotenv()
 
 PREFIX = os.environ.get('PREFIX') is None
-TOKEN = os.environ['TOKEN']
+TOKEN = os.environ.get('TOKEN') is None
 
 client = discord.Client()
 
