@@ -227,7 +227,7 @@ async def on_message(message):
 
  #여기부턴 저렙보스
 
-    if message.content.startswith('!저렙보스컷'):
+    if message.content.startswith('!저렙컷'):
         target = message.content.split()[1] #입력된 메시지에서 2번째 단어 추출
         now = datetime.utcnow() + timedelta(hours=9) #KST (UTC+9)
 
