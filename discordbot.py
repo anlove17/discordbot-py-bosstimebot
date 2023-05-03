@@ -112,8 +112,8 @@ async def on_message(message):
                     reply.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
             await message.reply('\n'.join(reply))
         
-        elif boss_name in RowBoss_INFO:
-            for name, info in sorted(RowBOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
+        elif boss_name in LOWBOSS_INFO:
+            for name, info in sorted(LOWBOSS_INFO.items(), key=lambda x: x[1]['다음 젠 시간']):
                 if name == target:
                     next_spawn = now + timedelta(minutes=info["젠주기"])
                     BOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
