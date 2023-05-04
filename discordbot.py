@@ -1,15 +1,18 @@
 from cmath import log
 from distutils.sysconfig import PREFIX
 import discord
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
-load_dotenv()
+#load_dotenv()
 
 PREFIX = os.environ['PREFIX']
 TOKEN = os.environ['TOKEN']
 
-client = discord.Client()
+intents = discord.Intents.default()
+intents.message_content = True
+
+client = discord.Client(intents=intents)
 
 LOWBOSS_INFO = {
     '울리케' : { '젠주기': 180,'젠위치': '어스름깃털 언덕' , '레벨':32 , '다음 젠 시간' : '??:??' },
