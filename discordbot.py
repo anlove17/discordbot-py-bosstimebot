@@ -171,7 +171,7 @@ async def on_message(message):
                 else:
                     boss_reply.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
             boss_reply = sorted(boss_reply, key=lambda x: x.split(',')[0])
-            await message.reply('\n'.join(reply))
+            await message.reply('\n'.join(boss_reply))
             with open('BOSS_INFO.txt','w',encoding='UTF-8') as file:
                 for name, info in BOSS_INFO.items():
                     file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
