@@ -90,10 +90,10 @@ ABOSS_INFO = {
 @client.event
 async def on_ready():
     #데이터 베이스 연결
-    db_host = os.environ.get('CLEARDB_DATABASE_HOST')
-    db_user = os.environ.get('CLEARDB_DATABASE_USER')
-    db_password = os.environ.get('CLEARDB_DATABASE_PASSWORD')
-    db_name = os.environ.get('CLEARDB_DATABASE_DB')
+    db_host = os.environ.get('DB_HOST')
+    db_user = os.environ.get('DB_USER_NAME')
+    db_password = os.environ.get('DB_PASSWORD')
+    db_name = os.environ.get('DB_NAME')
     
     boss_db = mysql.connector.connect(
         host=db_host,
