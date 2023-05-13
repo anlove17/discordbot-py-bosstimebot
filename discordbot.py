@@ -261,7 +261,7 @@ async def on_message(message):
                 location = info['젠위치']
                 level = info['레벨']
 
-                query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s, WHERE name = %s"
+                query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
                 values = (next_spawn, location, level, name)
                 cursor.execute(query, values)
 
@@ -304,7 +304,7 @@ async def on_message(message):
             location = info['젠위치']
             level = info['레벨']
 
-            query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s, WHERE name = %s"
+            query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
             values = (next_spawn, location, level, name)
             cursor.execute(query, values)
 
@@ -338,7 +338,7 @@ async def on_message(message):
             location = info['젠위치']
             level = info['레벨']
 
-            query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s, WHERE name = %s"
+            query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
             values = (next_spawn, location, level, name)
             cursor.execute(query, values)
 
@@ -360,7 +360,7 @@ async def on_message(message):
             location = info['젠위치']
             level = info['레벨']
 
-            query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s, WHERE name = %s"
+            query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
             values = (next_spawn, location, level, name)
             cursor.execute(query, values)
 
