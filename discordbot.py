@@ -79,69 +79,139 @@ ABOSS_INFO = {
     '야수': {'젠주기': 360, '젠위치': '용암호수', '레벨': 50, '다음 젠 시간': '??:??'},
     '체스킹퀸': {'젠주기': 360, '젠위치': '왕과 여왕의 성', '레벨': 50, '다음 젠 시간': '??:??'},
     '이즈굴드': {'젠주기': 360, '젠위치': '용의 둥지', '레벨': 50, '다음 젠 시간': '??:??'},
-    '토룡': {'젠주기': 360, '젠위치': '토룡의 둥지', '레벨': 50, '다음 젠 시간': '??:??'},
-    '어미': {'젠주기': 360, '젠위치': '어미 서식지', '레벨': 50, '다음 젠 시간': '??:??'},
-    '궤': {'젠주기': 360, '젠위치': '버려진 광장', '레벨': 50, '다음 젠 시간': '??:??'},
-    '어머니': {'젠주기': 360, '젠위치': '지룡의 쉼터', '레벨': 50, '다음 젠 시간': '??:??'}
+    '토룡': {'젠주기': 360, '젠위치': '토룡의 둥지', '레벨': 56, '다음 젠 시간': '??:??'},
+    '어미': {'젠주기': 360, '젠위치': '어미 서식지', '레벨': 56, '다음 젠 시간': '??:??'},
+    '궤': {'젠주기': 360, '젠위치': '버려진 광장', '레벨': 56, '다음 젠 시간': '??:??'},
+    '어머니': {'젠주기': 360, '젠위치': '지룡의 쉼터', '레벨': 56, '다음 젠 시간': '??:??'}
 }
 
 
 @client.event
 async def on_ready():
-    print('봇이 온라인으로 전환되었습니다.')
+    #데이터 베이스 연결
+    boss_db = mysql.connector.connect(
+        host=os.environ['DB_HOST'],
+        user=os.environ['DB_USER_NAME'],
+        password=os.environ['DB_PASSWORD'],
+        database=os.environ['DB_NAME'],
+    )
+    cursor = boss_db.cursor()
+
+    #DB 에 테이블이 없을 경우, 테이블 생성
+    cursor.execute('''CREATE TABLE IF NOT EXISTS BOSS_INFO (
+                        name VARCHAR(255) PRIMARY KEY,
+                        location VARCHAR(255),
+                        level INT,
+                        next_spawn VARCHAR(255)
+                    )''')
+
+    cursor.execute('''CREATE TABLE IF NOT EXISTS LOWBOSS_INFO (
+                        name VARCHAR(255) PRIMARY KEY,
+                        location VARCHAR(255),
+                        level INT,
+                        next_spawn VARCHAR(255)
+                    )''')
+
+    cursor.execute('''CREATE TABLE IF NOT EXISTS ABOSS_INFO (
+                        name VARCHAR(255) PRIMARY KEY,
+                        location VARCHAR(255),
+                        level INT,
+                        next_spawn VARCHAR(255)
+                    )''')
+
     await update_boss_data()
     await update_aboss_data()
     await update_lowboss_data()
     await client.change_presence(status=discord.Status.online, activity=discord.Game("보스 타임 체크"))
-
+    print('봇이 온라인으로 전환되었습니다.')
 
 async def update_boss_data():
-    # 텍스트 파일로 저장되어 있던 보스 이전 젠 시간 정보를 현재 딕셔너리로 적용
-    filepath_boss_info = 'BOSS_INFO.txt'
+    # DB에 저장되어 있던 데이터를 딕셔너리로 이동
+    boss_db = mysql.connector.connect(
+        host='us-cdbr-east-06.cleardb.net',
+        user='bf61fea885d392',
+        password='ff8f9bad',
+        database='heroku_b11c445fa59b270',
+    )
+    cursor = boss_db.cursor()
 
-    # 일반 보스 쪽
-    with open(filepath_boss_info, 'r', encoding='utf-8') as file:
-        lines = file.readlines()
+    #BOSS_INFO 테이블 조회 쿼리 실행
+    query = "SELECT * FROM BOSS_INFO"
+    cursor.execute(query)
 
-    for line in lines:
-        boss_info = line.strip().split(',')
-        boss_name = boss_info[1].strip()
-        next_spawn_time = boss_info[0].strip()
+    #조회된 데이터를 파이썬의 BOSS_INFO 에 딕셔너리에 저장
+    global BOSS_INFO
+    for row in cursor:
+        boss_name = row[0]
+        boss_info = {
+            '젠주기': BOSS_INFO.get(boss_name, {}).get('젠주기'),  # 기존 젠주기 값 유지
+            '젠위치': row[1],
+            '레벨': row[2],
+            '다음 젠 시간': row[3]
+        }
+        BOSS_INFO[boss_name] = boss_info
 
-        if boss_name in BOSS_INFO:
-            BOSS_INFO[boss_name]['다음 젠 시간'] = next_spawn_time
+    cursor.close()
+    boss_db.close()
 
 async def update_aboss_data():
-    # 텍스트 파일로 저장되어 있던 보스 이전 젠 시간 정보를 현재 딕셔너리로 적용
-    filepath_aboss_info = 'ABOSS_INFO.txt'
+    # DB에 저장되어 있던 데이터를 딕셔너리로 이동
+    boss_db = mysql.connector.connect(
+        host='us-cdbr-east-06.cleardb.net',
+        user='bf61fea885d392',
+        password='ff8f9bad',
+        database='heroku_b11c445fa59b270',
+    )
+    cursor = boss_db.cursor()
 
-    # 영지 보스 쪽
-    with open(filepath_aboss_info, 'r', encoding='utf-8') as file:
-        lines = file.readlines()
+    # ABOSS_INFO 테이블 조회 쿼리 실행
+    query = "SELECT * FROM ABOSS_INFO"
+    cursor.execute(query)
 
-    for line in lines:
-        boss_info = line.strip().split(',')
-        boss_name = boss_info[1].strip()
-        next_spawn_time = boss_info[0].strip()
+    # 조회된 데이터를 파이썬의 ABOSS_INFO 에 딕셔너리에 저장
+    global ABOSS_INFO
+    for row in cursor:
+        boss_name = row[0]
+        boss_info = {
+            '젠주기': ABOSS_INFO.get(boss_name, {}).get('젠주기'),  # 기존 젠주기 값 유지
+            '젠위치': row[1],
+            '레벨': row[2],
+            '다음 젠 시간': row[3]
+        }
+        ABOSS_INFO[boss_name] = boss_info
 
-        if boss_name in ABOSS_INFO:
-            ABOSS_INFO[boss_name]['다음 젠 시간'] = next_spawn_time
+    cursor.close()
+    boss_db.close()
+
 
 async def update_lowboss_data():
-    # 텍스트 파일로 저장되어 있던 보스 이전 젠 시간 정보를 현재 딕셔너리로 적용
-    filepath_lowboss_info = 'LOWBOSS_INFO.txt'
+    # DB에 저장되어 있던 데이터를 딕셔너리로 이동
+    boss_db = mysql.connector.connect(
+        host='us-cdbr-east-06.cleardb.net',
+        user='bf61fea885d392',
+        password='ff8f9bad',
+        database='heroku_b11c445fa59b270',
+    )
+    cursor = boss_db.cursor()
 
-    # 저렙 보스 쪽
-    with open(filepath_lowboss_info, 'r', encoding='utf-8') as file:
-        lines = file.readlines()
+    # LOWBOSS_INFO 테이블 조회 쿼리 실행
+    query = "SELECT * FROM LOWBOSS_INFO"
+    cursor.execute(query)
 
-    for line in lines:
-        boss_info = line.strip().split(',')
-        boss_name = boss_info[1].strip()
-        next_spawn_time = boss_info[0].strip()
+    # 조회된 데이터를 파이썬의 BOSS_INFO 에 딕셔너리에 저장
+    global LOWBOSS_INFO
+    for row in cursor:
+        boss_name = row[0]
+        boss_info = {
+            '젠주기': LOWBOSS_INFO.get(boss_name, {}).get('젠주기'),  # 기존 젠주기 값 유지
+            '젠위치': row[1],
+            '레벨': row[2],
+            '다음 젠 시간': row[3]
+        }
+        LOWBOSS_INFO[boss_name] = boss_info
 
-        if boss_name in LOWBOSS_INFO:
-            LOWBOSS_INFO[boss_name]['다음 젠 시간'] = next_spawn_time
+    cursor.close()
+    boss_db.close()
 
 
 @client.event
@@ -153,6 +223,12 @@ async def on_message(message):
     boss_reply = []
     aboss_reply = []
     lowboss_reply = []
+    boss_db = mysql.connector.connect(
+        host='us-cdbr-east-06.cleardb.net',
+        user='bf61fea885d392',
+        password='ff8f9bad',
+        database='heroku_b11c445fa59b270',
+    )
 
 # 실제 명령어 부분
         
@@ -172,9 +248,21 @@ async def on_message(message):
                     boss_reply.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
             boss_reply = sorted(boss_reply, key=lambda x: x.split(',')[0])
             await message.reply('\n'.join(boss_reply))
-            with open('BOSS_INFO.txt','w',encoding='UTF-8') as file:
-                for name, info in BOSS_INFO.items():
-                    file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+            #메시지 보낸걸, DB에 저장하자
+            cursor = boss_db.cursor()
+            for name, info in BOSS_INFO.items():
+                next_spawn = info['다음 젠 시간']
+                location = info['젠위치']
+                level = info['레벨']
+
+                query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s, WHERE name = %s"
+                values = (next_spawn, location, level, name)
+                cursor.execute(query, values)
+
+            boss_db.commit()
+
+            cursor.close()
+            boss_db.close()
         else:
             await message.reply('존재하지 않는 보스 이름입니다.')
             return
@@ -203,9 +291,21 @@ async def on_message(message):
             boss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         boss_reply = sorted(boss_reply, key=lambda x: x.split(',')[0])
         await message.reply('\n'.join(boss_reply))
-        with open('BOSS_INFO.txt', 'w', encoding='UTF-8') as file:
-            for name, info in BOSS_INFO.items():
-                file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+        # 메시지 보낸걸, DB에 저장하자
+        cursor = boss_db.cursor()
+        for name, info in BOSS_INFO.items():
+            next_spawn = info['다음 젠 시간']
+            location = info['젠위치']
+            level = info['레벨']
+
+            query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s, WHERE name = %s"
+            values = (next_spawn, location, level, name)
+            cursor.execute(query, values)
+
+        boss_db.commit()
+
+        cursor.close()
+        boss_db.close()
 
     elif message.content.startswith('!초기화'):
 
@@ -225,9 +325,21 @@ async def on_message(message):
             boss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         boss_reply = sorted(boss_reply, key=lambda x: x.split(',')[0])
         await message.reply('\n'.join(boss_reply))
-        with open('BOSS_INFO.txt', 'w', encoding='UTF-8') as file:
-            for name, info in BOSS_INFO.items():
-                file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+        # 메시지 보낸걸, DB에 저장하자
+        cursor = boss_db.cursor()
+        for name, info in BOSS_INFO.items():
+            next_spawn = info['다음 젠 시간']
+            location = info['젠위치']
+            level = info['레벨']
+
+            query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s, WHERE name = %s"
+            values = (next_spawn, location, level, name)
+            cursor.execute(query, values)
+
+        boss_db.commit()
+
+        cursor.close()
+        boss_db.close()
 
     elif message.content == '!전체초기화':
         for name, info in BOSS_INFO.items():
@@ -235,9 +347,21 @@ async def on_message(message):
             boss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         boss_reply = sorted(boss_reply, key=lambda x: x.split(',')[0])
         await message.reply('\n'.join(boss_reply))
-        with open('BOSS_INFO.txt', 'w', encoding='UTF-8') as file:
-            for name, info in BOSS_INFO.items():
-                file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+        # 메시지 보낸걸, DB에 저장하자
+        cursor = boss_db.cursor()
+        for name, info in BOSS_INFO.items():
+            next_spawn = info['다음 젠 시간']
+            location = info['젠위치']
+            level = info['레벨']
+
+            query = "UPDATE BOSS_INFO SET next_spawn = %s, location = %s, level = %s, WHERE name = %s"
+            values = (next_spawn, location, level, name)
+            cursor.execute(query, values)
+
+        boss_db.commit()
+
+        cursor.close()
+        boss_db.close()
 
     # 여기부턴 영지 보스
 
@@ -252,14 +376,26 @@ async def on_message(message):
                 if name == target:
                     next_spawn = now + timedelta(minutes=info["젠주기"])
                     ABOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
-                    aboss_reply.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
+                    aboss_reply.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, {info['젠위치']}, {info['레벨']}")
                 else:
                     aboss_reply.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
             aboss_reply = sorted(aboss_reply, key=lambda x: x.split(',')[0])
             await message.reply('\n'.join(aboss_reply))
-            with open('ABOSS_INFO.txt', 'w', encoding='UTF-8') as file:
-                for name, info in ABOSS_INFO.items():
-                    file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+            # 메시지 보낸걸, DB에 저장하자
+            cursor = boss_db.cursor()
+            for name, info in ABOSS_INFO.items():
+                next_spawn = info['다음 젠 시간']
+                location = info['젠위치']
+                level = info['레벨']
+
+                query = "UPDATE ABOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+                values = (next_spawn, location, level, name)
+                cursor.execute(query, values)
+
+            boss_db.commit()
+
+            cursor.close()
+            boss_db.close()
         else:
             await message.reply('존재하지 않는 보스 이름입니다.')
             return
@@ -288,9 +424,21 @@ async def on_message(message):
             aboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         aboss_reply = sorted(aboss_reply, key=lambda x: x.split(',')[0])
         await message.reply('\n'.join(aboss_reply))
-        with open('ABOSS_INFO.txt', 'w', encoding='UTF-8') as file:
-            for name, info in ABOSS_INFO.items():
-                file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+        # 메시지 보낸걸, DB에 저장하자
+        cursor = boss_db.cursor()
+        for name, info in ABOSS_INFO.items():
+            next_spawn = info['다음 젠 시간']
+            location = info['젠위치']
+            level = info['레벨']
+
+            query = "UPDATE ABOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+            values = (next_spawn, location, level, name)
+            cursor.execute(query, values)
+
+        boss_db.commit()
+
+        cursor.close()
+        boss_db.close()
 
     elif message.content.startswith('!영지초기화'):
 
@@ -310,18 +458,42 @@ async def on_message(message):
             aboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         aboss_reply = sorted(aboss_reply, key=lambda x: x.split(',')[0])
         await message.reply('\n'.join(aboss_reply))
-        with open('ABOSS_INFO.txt', 'w', encoding='UTF-8') as file:
-            for name, info in ABOSS_INFO.items():
-                file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+        # 메시지 보낸걸, DB에 저장하자
+        cursor = boss_db.cursor()
+        for name, info in ABOSS_INFO.items():
+            next_spawn = info['다음 젠 시간']
+            location = info['젠위치']
+            level = info['레벨']
+
+            query = "UPDATE ABOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+            values = (next_spawn, location, level, name)
+            cursor.execute(query, values)
+
+        boss_db.commit()
+
+        cursor.close()
+        boss_db.close()
 
     elif message.content == '!영지전체초기화':
         for name, info in ABOSS_INFO.items():
             ABOSS_INFO[name]['다음 젠 시간'] = '??:??'
             aboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         await message.reply('\n'.join(aboss_reply))
-        with open('ABOSS_INFO.txt', 'w', encoding='UTF-8') as file:
-            for name, info in ABOSS_INFO.items():
-                file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+        # 메시지 보낸걸, DB에 저장하자
+        cursor = boss_db.cursor()
+        for name, info in ABOSS_INFO.items():
+            next_spawn = info['다음 젠 시간']
+            location = info['젠위치']
+            level = info['레벨']
+
+            query = "UPDATE ABOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+            values = (next_spawn, location, level, name)
+            cursor.execute(query, values)
+
+        boss_db.commit()
+
+        cursor.close()
+        boss_db.close()
 
     # 여기부턴 저렙보스
 
@@ -341,9 +513,21 @@ async def on_message(message):
                     lowboss_reply.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
             lowboss_reply = sorted(lowboss_reply, key=lambda x: x.split(',')[0])
             await message.reply('\n'.join(lowboss_reply))
-            with open('LOWBOSS_INFO.txt', 'w', encoding='UTF-8') as file:
-                for name, info in LOWBOSS_INFO.items():
-                    file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+            # 메시지 보낸걸, DB에 저장하자
+            cursor = boss_db.cursor()
+            for name, info in LOWBOSS_INFO.items():
+                next_spawn = info['다음 젠 시간']
+                location = info['젠위치']
+                level = info['레벨']
+
+                query = "UPDATE ABOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+                values = (next_spawn, location, level, name)
+                cursor.execute(query, values)
+
+            boss_db.commit()
+
+            cursor.close()
+            boss_db.close()
         else:
             await message.reply('존재하지 않는 보스 이름입니다.')
             return
@@ -373,9 +557,21 @@ async def on_message(message):
             lowboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         lowboss_reply = sorted(lowboss_reply, key=lambda x: x.split(',')[0])
         await message.reply('\n'.join(lowboss_reply))
-        with open('LOWBOSS_INFO.txt', 'w', encoding='UTF-8') as file:
-            for name, info in LOWBOSS_INFO.items():
-                file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+        # 메시지 보낸걸, DB에 저장하자
+        cursor = boss_db.cursor()
+        for name, info in LOWBOSS_INFO.items():
+            next_spawn = info['다음 젠 시간']
+            location = info['젠위치']
+            level = info['레벨']
+
+            query = "UPDATE LOWBOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+            values = (next_spawn, location, level, name)
+            cursor.execute(query, values)
+
+        boss_db.commit()
+
+        cursor.close()
+        boss_db.close()
 
     elif message.content.startswith('!저렙초기화'):
 
@@ -395,18 +591,42 @@ async def on_message(message):
             lowboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         lowboss_reply = sorted(lowboss_reply, key=lambda x: x.split(',')[0])
         await message.reply('\n'.join(lowboss_reply))
-        with open('LOWBOSS_INFO.txt', 'w', encoding='UTF-8') as file:
-            for name, info in LOWBOSS_INFO.items():
-                file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+        # 메시지 보낸걸, DB에 저장하자
+        cursor = boss_db.cursor()
+        for name, info in LOWBOSS_INFO.items():
+            next_spawn = info['다음 젠 시간']
+            location = info['젠위치']
+            level = info['레벨']
+
+            query = "UPDATE LOWBOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+            values = (next_spawn, location, level, name)
+            cursor.execute(query, values)
+
+        boss_db.commit()
+
+        cursor.close()
+        boss_db.close()
 
     elif message.content == '!저렙전체초기화':
         for name, info in LOWBOSS_INFO.items():
             LOWBOSS_INFO[name]['다음 젠 시간'] = '??:??'
             lowboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
         await message.reply('\n'.join(lowboss_reply))
-        with open('LOWBOSS_INFO.txt', 'w', encoding='UTF-8') as file:
-            for name, info in LOWBOSS_INFO.items():
-                file.write(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}\n")
+        # 메시지 보낸걸, DB에 저장하자
+        cursor = boss_db.cursor()
+        for name, info in LOWBOSS_INFO.items():
+            next_spawn = info['다음 젠 시간']
+            location = info['젠위치']
+            level = info['레벨']
+
+            query = "UPDATE LOWBOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+            values = (next_spawn, location, level, name)
+            cursor.execute(query, values)
+
+        boss_db.commit()
+
+        cursor.close()
+        boss_db.close()
 
 try:
     client.run(TOKEN)
