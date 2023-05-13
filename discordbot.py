@@ -5,6 +5,7 @@ import discord
 import os
 from datetime import datetime, timedelta
 #load_dotenv()
+import mysql.connector
 
 PREFIX = os.environ['PREFIX']
 TOKEN = os.environ['TOKEN']
