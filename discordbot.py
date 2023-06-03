@@ -104,6 +104,26 @@ ABOSS_INFO = {
 }
 
 
+
+async def bosstime_alert(boss_info):
+    for boss_name, boss_data in boss_info.items():
+        next_time = boss_data['다음 젠 시간']
+        if next_time == '??:??':
+            continue
+
+        next_time = datetime.strptime(next_time, '%H:%M').time()
+        now = datetime.now().time()
+
+        #if next_time < now:
+        #    next_time += timedelta(days=1)
+
+        time_left = int ((datetime.combine(date.today(), next_time) - datetime.combine(date.today(), now)).total_seconds() // 60)
+        if time_left == 1:
+            channel = client.get_channel(1114409826714406963)  # 메시지를 보낼 채널의 ID를 입력하세요.
+            await channel.send(f'/tts text: 영지보스 {boss_name}의 다음 젠이 {time_left + 1}분 남았습니다.')  # 원하는 메시지를 입력하세요.
+
+
+
 @client.event
 async def on_ready():
     #데이터 베이스 연결
@@ -147,6 +167,10 @@ async def on_ready():
     await update_lowboss_data()
     await client.change_presence(status=discord.Status.online, activity=discord.Game("보스 타임 체크"))
     print('봇이 온라인으로 전환되었습니다.')
+    while not client.is_closed():
+        asyncio.create_task((bosstime_alert(ABOSS_INFO)))
+        await asyncio.sleep(60)
+
 
 async def update_boss_data():
     # DB에 저장되어 있던 데이터를 딕셔너리로 이동
