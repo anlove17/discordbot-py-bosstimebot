@@ -118,7 +118,7 @@ async def bosstime_alert(boss_info):
         #    next_time += timedelta(days=1)
 
         time_left = int ((datetime.combine(date.today(), next_time) - datetime.combine(date.today(), now)).total_seconds() // 60)
-        if time_left == 1:
+        if time_left == 4:
             channel = client.get_channel(1114409826714406963)  # 메시지를 보낼 채널의 ID를 입력하세요.
             await channel.send(f'/tts text: 영지보스 {boss_name}의 다음 젠이 {time_left + 1}분 남았습니다.')  # 원하는 메시지를 입력하세요.
 
