@@ -3,7 +3,7 @@ from distutils.sysconfig import PREFIX
 import discord
 #from dotenv import load_dotenv
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import asyncio
 #load_dotenv()
 import mysql.connector
