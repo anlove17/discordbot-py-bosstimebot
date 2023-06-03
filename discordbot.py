@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, date
 import asyncio
 #load_dotenv()
 import mysql.connector
+import pytz
 
 PREFIX = os.environ['PREFIX']
 TOKEN = os.environ['TOKEN']
@@ -15,6 +16,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
+korea_timezone = pytz.timezone('Asia/Seoul')
 
 LOWBOSS_INFO = {
     '울리케': {'젠주기': 180, '젠위치': '어스름깃털 언덕', '레벨': 32, '다음 젠 시간': '??:??'},
@@ -113,7 +115,7 @@ async def bosstime_alert(boss_info):
             continue
 
         next_time = datetime.strptime(next_time, '%H:%M').time()
-        now = datetime.now().time()
+        now = datetime.now(korea_timezone).time()
 
         #if next_time < now:
         #    next_time += timedelta(days=1)
