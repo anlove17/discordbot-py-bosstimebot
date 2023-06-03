@@ -4,6 +4,7 @@ import discord
 #from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
+import asyncio
 #load_dotenv()
 import mysql.connector
 
