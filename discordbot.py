@@ -106,6 +106,17 @@ ABOSS_INFO = {
     '칼부숨이': {'젠주기': 720, '젠위치': '칼부숨이 수용소', '레벨': 65, '다음 젠 시간': '??:??'}
 }
 
+CROSSBOSS_INFO = {
+    '무크로': {'젠주기': 540, '젠위치': '4번 망령의 황무지', '레벨': 65, '다음 젠 시간': '??:??'},
+    '루벤스': {'젠주기': 540, '젠위치': '1번 스러진 날개숲', '레벨': 65, '다음 젠 시간': '??:??'},
+    '이시도르': {'젠주기': 660, '젠위치': '2번 축축한 숲', '레벨': 68, '다음 젠 시간': '??:??'},
+    '야수조달자': {'젠주기': 660, '젠위치': '3번 흐느끼는 황야', '레벨': 68, '다음 젠 시간': '??:??'},
+    '으뜸자1번': {'젠주기': 360, '젠위치': '1번', '레벨': 68, '다음 젠 시간': '??:??'},
+    '으뜸자2번': {'젠주기': 360, '젠위치': '2번', '레벨': 68, '다음 젠 시간': '??:??'},
+    '으뜸자3번': {'젠주기': 360, '젠위치': '3번', '레벨': 68, '다음 젠 시간': '??:??'},
+    '으뜸자4번': {'젠주기': 360, '젠위치': '4번', '레벨': 68, '다음 젠 시간': '??:??'},
+    '으뜸자5번': {'젠주기': 360, '젠위치': '5번', '레벨': 68, '다음 젠 시간': '??:??'}
+}
 
 
 async def bosstime_alert(boss_info):
@@ -264,6 +275,36 @@ async def update_lowboss_data():
     boss_db.close()
 
 
+async def update_crossboss_data():
+    # DB에 저장되어 있던 데이터를 딕셔너리로 이동
+    boss_db = mysql.connector.connect(
+        host='us-cdbr-east-06.cleardb.net',
+        user='bf61fea885d392',
+        password='ff8f9bad',
+        database='heroku_b11c445fa59b270',
+    )
+    cursor = boss_db.cursor()
+
+    # LOWBOSS_INFO 테이블 조회 쿼리 실행
+    query = "SELECT * FROM CROSSBOSS_INFO"
+    cursor.execute(query)
+
+    # 조회된 데이터를 파이썬의 CROSSBOSS_INFO 에 딕셔너리에 저장
+    global CROSSBOSS_INFO
+    for row in cursor:
+        boss_name = row[0]
+        boss_info = {
+            '젠주기': CROSSBOSS_INFO.get(boss_name, {}).get('젠주기'),  # 기존 젠주기 값 유지
+            '젠위치': row[1],
+            '레벨': row[2],
+            '다음 젠 시간': row[3]
+        }
+        LOWBOSS_INFO[boss_name] = boss_info
+
+    cursor.close()
+    boss_db.close()
+
+
 @client.event
 async def on_message(message):
     if message.author == client.user:
@@ -273,6 +314,7 @@ async def on_message(message):
     boss_reply = []
     aboss_reply = []
     lowboss_reply = []
+    crossboss_reply = []
     boss_db = mysql.connector.connect(
         host='us-cdbr-east-06.cleardb.net',
         user='bf61fea885d392',
@@ -545,32 +587,33 @@ async def on_message(message):
         cursor.close()
         boss_db.close()
 
-    # 여기부턴 저렙보스
 
-    if message.content.startswith('!저렙컷'):
+    # 여기부턴 크렐보스
+
+    if message.content.startswith('!크렐컷'):
         target = message.content.split()[1]  # 입력된 메시지에서 2번째 단어 추출
         now = datetime.utcnow() + timedelta(hours=9)  # KST (UTC+9)
         args = message.content.split()
         boss_name = args[1]
 
-        if boss_name in LOWBOSS_INFO:
-            for name, info in LOWBOSS_INFO.items():
+        if boss_name in CROSSBOSS_INFO:
+            for name, info in CROSSBOSS_INFO.items():
                 if name == target:
                     next_spawn = now + timedelta(minutes=info["젠주기"])
-                    LOWBOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
-                    lowboss_reply.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
+                    CROSSBOSS_INFO[name]["다음 젠 시간"] = next_spawn.strftime('%H:%M')
+                    crossboss_reply.append(f"{next_spawn.hour}:{next_spawn.minute}, {name}, , {info['젠위치']}, {info['레벨']}")
                 else:
-                    lowboss_reply.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
-            lowboss_reply = sorted(lowboss_reply, key=lambda x: x.split(',')[0])
-            await message.reply('\n'.join(lowboss_reply))
+                    crossboss_reply.append(f"{info['다음 젠 시간']} , {name},  {info['젠위치']}, {info['레벨']}")
+            crossboss_reply = sorted(crossboss_reply, key=lambda x: x.split(',')[0])
+            await message.reply('\n'.join(crossboss_reply))
             # 메시지 보낸걸, DB에 저장하자
             cursor = boss_db.cursor()
-            for name, info in LOWBOSS_INFO.items():
+            for name, info in CROSSBOSS_INFO.items():
                 next_spawn = info['다음 젠 시간']
                 location = info['젠위치']
                 level = info['레벨']
 
-                query = "UPDATE ABOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+                query = "UPDATE CROSSBOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
                 values = (next_spawn, location, level, name)
                 cursor.execute(query, values)
 
@@ -579,20 +622,20 @@ async def on_message(message):
             cursor.close()
             boss_db.close()
         else:
-            await message.reply('존재하지 않는 보스 이름입니다.')
+            await message.reply('존재하지 않는 b보스 이름입니다.')
             return
 
-    elif message.content.startswith('!저렙젠타임'):
+    elif message.content.startswith('!크렐젠타임'):
 
         args = message.content.split()  # 보스 이름과 시간 정보 추출
         if len(args) != 3:
-            await message.reply('잘못된 명령어입니다. 사용법: !저렙젠타임 보스이름 시간(HH:MM)')
+            await message.reply('잘못된 명령어입니다. 사용법: !크렐젠타임 보스이름 시간(HH:MM)')
             return
         boss_name = args[1]
         time_str = args[2]
 
         # BOSS_INFO 갱신
-        if boss_name not in LOWBOSS_INFO:
+        if boss_name not in CROSSBOSS_INFO:
             await message.reply('존재하지 않는 보스 이름입니다.')
             return
         try:
@@ -600,21 +643,21 @@ async def on_message(message):
         except ValueError:
             await message.reply('잘못된 시간 형식입니다. 사용법: HH:MM')
             return
-        LOWBOSS_INFO[boss_name]['다음 젠 시간'] = time_str
+        CROSSBOSS_INFO[boss_name]['다음 젠 시간'] = time_str
 
         # 갱신된 BOSS_INFO 출력
-        for name, info in LOWBOSS_INFO.items():
-            lowboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
-        lowboss_reply = sorted(lowboss_reply, key=lambda x: x.split(',')[0])
-        await message.reply('\n'.join(lowboss_reply))
+        for name, info in CROSSBOSS_INFO.items():
+            crossboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
+        crossboss_reply = sorted(crossboss_reply, key=lambda x: x.split(',')[0])
+        await message.reply('\n'.join(crossboss_reply))
         # 메시지 보낸걸, DB에 저장하자
         cursor = boss_db.cursor()
-        for name, info in LOWBOSS_INFO.items():
+        for name, info in CROSSBOSS_INFO.items():
             next_spawn = info['다음 젠 시간']
             location = info['젠위치']
             level = info['레벨']
 
-            query = "UPDATE LOWBOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+            query = "UPDATE CROSSBOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
             values = (next_spawn, location, level, name)
             cursor.execute(query, values)
 
@@ -623,7 +666,7 @@ async def on_message(message):
         cursor.close()
         boss_db.close()
 
-    elif message.content.startswith('!저렙초기화'):
+    elif message.content.startswith('!크렐초기화'):
 
         args = message.content.split()  # 보스 이름과 시간 정보 추출
         if len(args) != 2:
@@ -631,24 +674,24 @@ async def on_message(message):
             return
         boss_name = args[1]
 
-        if boss_name not in LOWBOSS_INFO:
+        if boss_name not in CROSSBOSS_INFO:
             await message.reply('존재하지 않는 보스 이름입니다.')
             return
-        LOWBOSS_INFO[boss_name]['다음 젠 시간'] = '??:??'
+        CROSSBOSS_INFO[boss_name]['다음 젠 시간'] = '??:??'
 
         # 갱신된 BOSS_INFO 출력
-        for name, info in LOWBOSS_INFO.items():
-            lowboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
-        lowboss_reply = sorted(lowboss_reply, key=lambda x: x.split(',')[0])
-        await message.reply('\n'.join(lowboss_reply))
+        for name, info in CROSSBOSS_INFO.items():
+            crossboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
+        crossboss_reply = sorted(crossboss_reply, key=lambda x: x.split(',')[0])
+        await message.reply('\n'.join(crossboss_reply))
         # 메시지 보낸걸, DB에 저장하자
         cursor = boss_db.cursor()
-        for name, info in LOWBOSS_INFO.items():
+        for name, info in CROSSBOSS_INFO.items():
             next_spawn = info['다음 젠 시간']
             location = info['젠위치']
             level = info['레벨']
 
-            query = "UPDATE LOWBOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+            query = "UPDATE CROSSBOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
             values = (next_spawn, location, level, name)
             cursor.execute(query, values)
 
@@ -657,19 +700,19 @@ async def on_message(message):
         cursor.close()
         boss_db.close()
 
-    elif message.content == '!저렙전체초기화':
-        for name, info in LOWBOSS_INFO.items():
-            LOWBOSS_INFO[name]['다음 젠 시간'] = '??:??'
-            lowboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
-        await message.reply('\n'.join(lowboss_reply))
+    elif message.content == '!크렐전체초기화':
+        for name, info in CROSSBOSS_INFO.items():
+            CROSSBOSS_INFO[name]['다음 젠 시간'] = '??:??'
+            crossboss_reply.append(f"{info['다음 젠 시간']}, {name}, {info['젠위치']}, {info['레벨']}")
+        await message.reply('\n'.join(crossboss_reply))
         # 메시지 보낸걸, DB에 저장하자
         cursor = boss_db.cursor()
-        for name, info in LOWBOSS_INFO.items():
+        for name, info in CROSSBOSS_INFO.items():
             next_spawn = info['다음 젠 시간']
             location = info['젠위치']
             level = info['레벨']
 
-            query = "UPDATE LOWBOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
+            query = "UPDATE CROSSBOSS_INFO SET next_spawn = %s, location = %s, level = %s WHERE name = %s"
             values = (next_spawn, location, level, name)
             cursor.execute(query, values)
 
@@ -677,6 +720,7 @@ async def on_message(message):
 
         cursor.close()
         boss_db.close()
+
 
 try:
     client.run(TOKEN)
